@@ -137,7 +137,7 @@ elif stage == "offer":
                 with col:
                     item = suggestion.product
                     e = add_on_economics(book[(branch, item)]["price"], book[(branch, item)]["cost"])
-                    price = f"~~${e['price']}~~  **${e['discounted_price']}**  ＋"
+                    price = f"~~\\${e['price']}~~  **\\${e['discounted_price']}**  ＋"
                     if product_card(item, price, key=f"choose-{item}"):
                         if datetime.now(timezone.utc) < datetime.fromisoformat(st.session_state.deadline_utc):
                             st.session_state.selected = item
@@ -179,13 +179,13 @@ elif stage == "review":
                                           [seed] + ([selected] if selected else []), float(subtotal), float(gp)))
         st.session_state.stage = "done"
         st.rerun()
-    st.button("Start over", on_click=reset)
+    st.button("Start over", key="start-over", on_click=reset)
 
 else:
     st.html('<div class="success-mark" aria-hidden="true">✓</div>'
             '<h1 class="page-heading">A lovely choice.</h1>'
             '<p class="page-note">Demo purchase recorded.</p>')
-    st.button("New order", on_click=reset)
+    st.button("New order", key="new-order", on_click=reset)
 
 st.html('<footer class="page-footer"><span>Stories Coffee · Demo checkout · No real payment</span>'
         '<a href="https://unsplash.com" target="_blank" rel="noopener noreferrer">Photography via Unsplash &amp; web sources</a></footer>')
