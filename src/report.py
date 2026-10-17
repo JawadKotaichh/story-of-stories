@@ -227,7 +227,62 @@ def build_report(results: dict, figures: Path, output: Path):
       "demo events once. No prompt impression is used as a training label.")
     story.append(PageBreak())
 
-    heading("12. Financial sensitivity - example, not forecast")
+    heading("12. Why product is the sole neural input: factor tests")
+    inputs = results["input_justification"]
+    factors = inputs["factors"]
+    p("We tested the claim that other CSV fields predict combo buying rather than assuming it. The outcome here "
+      "is whether a completed transaction contains more than one distinct product. Cramer's V is an association "
+      "effect size from 0 (none) to 1 (strong); these are descriptive relationships, not causal effects. "
+      "A small p-value alone would be unhelpful at this sample size.")
+    story.append(_image(figures / "09_input_associations.png", max_height=3.65*inch))
+    rows = [["Recorded factor", "Cramer's V", "Lowest / highest multi-product rate", "Use at offer time?"]]
+    labels = {"branch": "Branch", "daypart": "Daypart", "weekday": "Weekday",
+              "month": "Month", "order_type": "Order type",
+              "customer_id_recorded": "Customer ID present", "discounted_line": "Discounted line"}
+    for key, label in labels.items():
+        f = factors[key]
+        availability = "Potentially" if key not in ["discounted_line"] else "No - post-purchase"
+        rows.append([label, f"{f['cramers_v']:.3f}",
+                     f"{f['min_rate']:.1%} / {f['max_rate']:.1%}", availability])
+    table(rows, [135, 76, 181, 128])
+    p("Branch, daypart, weekday, month, order type, and recorded-customer availability all have V below 0.02. "
+      "The discounted-line indicator has a larger association, but is determined during the completed sale; "
+      "using it at first-product selection would leak the outcome. Customer ID itself is an identifier with "
+      "substantial missingness, not a numeric quantity with meaningful distance.", "SmallX")
+    story.append(PageBreak())
+
+    heading("13. Do extra checkout inputs improve recommendations?")
+    p("We also tested whether known checkout context improves the <b>identity of the companion product</b>. "
+      "This diagnostic keeps the same smoothed product-pair count rule and adds one context at a time. "
+      "It fits January-March, picks smoothing on April, and reports May-June Hit@2. It is a feature "
+      "ablation for a simple comparator, not a retraining of the neural architecture. Exact month is "
+      "not tested as a context key because future months have no matching training observations.")
+    story.append(_image(figures / "10_input_ablation.png", max_height=3.5*inch))
+    ablation = inputs["context_ablation"]
+    rows = [["Count-rule input", "May-June Hit@2", "Change vs product only (paired 95% CI)"]]
+    input_labels = {"product_only": "Product only", "branch": "Product + branch",
+                    "daypart": "Product + daypart", "weekday": "Product + weekday",
+                    "order_type": "Product + order type",
+                    "branch_daypart": "Product + branch + daypart"}
+    for key in ["product_only", "branch", "daypart", "weekday", "order_type", "branch_daypart"]:
+        result = ablation[key]
+        delta = ("Reference" if key == "product_only" else
+                 f"{result['test_delta_vs_product_only']*100:+.2f} pp "
+                 f"({result['paired_delta_ci95'][0]*100:+.3f}, "
+                 f"{result['paired_delta_ci95'][1]*100:+.3f})")
+        rows.append([input_labels[key], f"{result['test_hit2']:.2%}", delta])
+    table(rows, [158, 115, 247])
+    p("Daypart has the highest point estimate for this count rule, but its paired interval includes zero; "
+      "the other tested contexts show no reliable held-out gain over the product-only version. "
+      "Intervals account for pairing on the same test baskets, not for all "
+      "model-selection uncertainty. The product-only neural network scored "
+      f"{nn_test['hit_at_2']:.2%} Hit@2 on this period. We keep its input to the selected product because "
+      "that is available at the exact offer moment, is simpler to update, and meets the product brief. "
+      "These experiments do not prove that all contextual signals are useless; a prospective test or a "
+      "controlled neural input ablation would be needed for that stronger claim.", "SmallX")
+    story.append(PageBreak())
+
+    heading("14. Financial sensitivity - example, not forecast")
     e = example
     unit = add_on_economics(e["price"], e["cost"])
     p(f"Example: Harbour, first item {pair['seed']}, offered add-on {pair['addon']}. "
@@ -251,7 +306,7 @@ def build_report(results: dict, figures: Path, output: Path):
       "incremental gross profit in this simplified example. Larger operating or substitution costs raise this threshold.")
     story.append(PageBreak())
 
-    heading("13. Portfolio-scale sensitivity")
+    heading("15. Portfolio-scale sensitivity")
     portfolio = results["portfolio_scenarios"]
     cost = portfolio["operating_cost_assumptions"]
     p(f"There are {portfolio['completed_one_product_baskets_proxy']:,} completed one-product transactions. "
@@ -280,7 +335,7 @@ def build_report(results: dict, figures: Path, output: Path):
       "must measure full baskets, not only recommended-item redemptions.")
     story.append(PageBreak())
 
-    heading("14. Marketing, operations, and pilot")
+    heading("16. Marketing, operations, and pilot")
     p("<b>Customer presentation:</b> after the first item, show two relevant add-ons, each original and discounted "
       "price, and a plain 15-second timer. Discount only a selected add-on. Monitor whether urgency increases "
       "abandonment or dissatisfaction. Branch and daypart can be used for targeting only when retrospective "

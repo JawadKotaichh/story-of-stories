@@ -794,6 +794,219 @@
     "deployed_retrained_on_all_six_months": true,
     "model_artifact": "nn_recommender.npz"
   },
+  "input_justification": {
+    "outcome": "more than one distinct product in completed transaction",
+    "association_note": "Cramer's V measures association, not causal effect; discount is observed after checkout.",
+    "factors": {
+      "branch": {
+        "cramers_v": 0.00791691219984143,
+        "min_rate": 0.454773082942097,
+        "max_rate": 0.46600376242945446,
+        "levels": {
+          "Garden": {
+            "n": 11163,
+            "multi_rate": 0.46600376242945446
+          },
+          "Harbour": {
+            "n": 16334,
+            "multi_rate": 0.4605730378351904
+          },
+          "Uptown": {
+            "n": 6390,
+            "multi_rate": 0.454773082942097
+          }
+        }
+      },
+      "daypart": {
+        "cramers_v": 0.011195810260124948,
+        "min_rate": 0.44777056730165377,
+        "max_rate": 0.4646552299579467,
+        "levels": {
+          "evening": {
+            "n": 14981,
+            "multi_rate": 0.4646552299579467
+          },
+          "midday": {
+            "n": 14129,
+            "multi_rate": 0.462240781371647
+          },
+          "morning": {
+            "n": 4777,
+            "multi_rate": 0.44777056730165377
+          }
+        }
+      },
+      "weekday": {
+        "cramers_v": 0.01594838456287014,
+        "min_rate": 0.4540319439033892,
+        "max_rate": 0.4775851763299462,
+        "levels": {
+          "Friday": {
+            "n": 5134,
+            "multi_rate": 0.4540319439033892
+          },
+          "Monday": {
+            "n": 4627,
+            "multi_rate": 0.4594769829263021
+          },
+          "Saturday": {
+            "n": 3346,
+            "multi_rate": 0.4775851763299462
+          },
+          "Sunday": {
+            "n": 4048,
+            "multi_rate": 0.4743083003952569
+          },
+          "Thursday": {
+            "n": 4679,
+            "multi_rate": 0.45949989313955975
+          },
+          "Tuesday": {
+            "n": 7398,
+            "multi_rate": 0.4556636928899703
+          },
+          "Wednesday": {
+            "n": 4655,
+            "multi_rate": 0.45864661654135336
+          }
+        }
+      },
+      "month": {
+        "cramers_v": 0.009935825647200266,
+        "min_rate": 0.45324532453245325,
+        "max_rate": 0.46698419571335786,
+        "levels": {
+          "1": {
+            "n": 4545,
+            "multi_rate": 0.45324532453245325
+          },
+          "2": {
+            "n": 4619,
+            "multi_rate": 0.46698419571335786
+          },
+          "3": {
+            "n": 5628,
+            "multi_rate": 0.4642857142857143
+          },
+          "4": {
+            "n": 5750,
+            "multi_rate": 0.4547826086956522
+          },
+          "5": {
+            "n": 6439,
+            "multi_rate": 0.4649790340114925
+          },
+          "6": {
+            "n": 6906,
+            "multi_rate": 0.4622067767158992
+          }
+        }
+      },
+      "order_type": {
+        "cramers_v": 0.003421135517850722,
+        "min_rate": 0.4592175544968962,
+        "max_rate": 0.4626865671641791,
+        "levels": {
+          "Dine-in": {
+            "n": 20033,
+            "multi_rate": 0.4626865671641791
+          },
+          "Takeaway": {
+            "n": 13854,
+            "multi_rate": 0.4592175544968962
+          }
+        }
+      },
+      "customer_id_recorded": {
+        "cramers_v": 0.004175969609058369,
+        "min_rate": 0.4596916504132999,
+        "max_rate": 0.46401683801505705,
+        "levels": {
+          "no": {
+            "n": 12353,
+            "multi_rate": 0.46401683801505705
+          },
+          "yes": {
+            "n": 21534,
+            "multi_rate": 0.4596916504132999
+          }
+        }
+      },
+      "discounted_line": {
+        "cramers_v": 0.10523746292524515,
+        "min_rate": 0.4441906005221932,
+        "max_rate": 0.6224206960271019,
+        "levels": {
+          "no": {
+            "n": 30640,
+            "multi_rate": 0.4441906005221932
+          },
+          "yes": {
+            "n": 3247,
+            "multi_rate": 0.6224206960271019
+          }
+        }
+      }
+    },
+    "context_ablation": {
+      "product_only": {
+        "alpha": null,
+        "validation_hit2": 0.10911408540471645,
+        "test_hit2": 0.10868628084922943
+      },
+      "branch": {
+        "alpha": 200.0,
+        "validation_hit2": 0.10956022944550674,
+        "test_hit2": 0.10682724431512015,
+        "test_delta_vs_product_only": -0.001859036534109279,
+        "paired_delta_ci95": [
+          -0.004175676488961558,
+          0.00045760342074299947
+        ]
+      },
+      "daypart": {
+        "alpha": 200.0,
+        "validation_hit2": 0.11249203314212876,
+        "test_hit2": 0.11135359413729927,
+        "test_delta_vs_product_only": 0.002667313288069835,
+        "paired_delta_ci95": [
+          -3.353610500355384e-05,
+          0.005368162681143224
+        ]
+      },
+      "weekday": {
+        "alpha": 200.0,
+        "validation_hit2": 0.1096239643084768,
+        "test_hit2": 0.10650393361353593,
+        "test_delta_vs_product_only": -0.0021823472356935015,
+        "paired_delta_ci95": [
+          -0.004254786556239849,
+          -0.00010990791514715317
+        ]
+      },
+      "order_type": {
+        "alpha": 50.0,
+        "validation_hit2": 0.10841300191204595,
+        "test_hit2": 0.10736609548442717,
+        "test_delta_vs_product_only": -0.0013201853648022416,
+        "paired_delta_ci95": [
+          -0.004847362161153364,
+          0.002206991431548881
+        ]
+      },
+      "branch_daypart": {
+        "alpha": 50.0,
+        "validation_hit2": 0.11147227533460807,
+        "test_hit2": 0.10585731221036748,
+        "test_delta_vs_product_only": -0.0028289686388619463,
+        "paired_delta_ci95": [
+          -0.00716313754048435,
+          0.0015052002627604574
+        ]
+      }
+    },
+    "context_ablation_note": "Count-rule diagnostic, not a neural architecture comparison; smoothing selected on April only."
+  },
   "pair_example": {
     "seed": "Iced Matcha",
     "addon": "Pistachio Cookie",
@@ -1175,6 +1388,8 @@
     "05_other_factors.png",
     "06_discount_margin.png",
     "07_model_ablation.png",
-    "08_neural_training.png"
+    "08_neural_training.png",
+    "09_input_associations.png",
+    "10_input_ablation.png"
   ]
 }

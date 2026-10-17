@@ -13,6 +13,7 @@ import pandas as pd
 from .data import Basket, audit, daypart, price_book, numeric_audit_frame
 from .economics import add_on_economics, break_even_new_rate, scenario_per_offer
 from .evaluate import benchmark, rolling_benchmark
+from .feature_study import study_inputs
 from .online_nn import OnlineNeuralRecommender
 from .train import train_and_select
 
@@ -48,6 +49,7 @@ def analyze(df: pd.DataFrame, baskets: list[Basket], figures: Path, model_artifa
     best = max(bench["validation_models"], key=lambda m: bench["validation_models"][m]["hit_at_2"])
     rolling = rolling_benchmark(baskets, products, best, categories)
     neural = train_and_select(baskets, categories, figures, model_artifact)
+    input_study = study_inputs(df, baskets, figures)
 
     tx = pd.DataFrame([{
         "id": b.transaction_id, "branch": b.branch, "hour": b.timestamp.hour,
@@ -217,6 +219,7 @@ def analyze(df: pd.DataFrame, baskets: list[Basket], figures: Path, model_artifa
                                                    "methods": numeric_methods},
         "benchmarks": bench, "best_baseline_on_validation": best, "rolling_best": rolling,
         "neural_training": neural,
+        "input_justification": input_study,
         "pair_example": {"seed": seed, "addon": addon,
                          "total_pair_transactions": pair_count[tuple(sorted((seed, addon)))],
                          "by_branch_period": pair_rows},
@@ -240,5 +243,6 @@ def analyze(df: pd.DataFrame, baskets: list[Basket], figures: Path, model_artifa
         },
         "figure_names": [f"{i:02d}_{name}.png" for i, name in enumerate(
             ["hour_branch", "category_daypart", "pair_lift", "example_pair",
-             "other_factors", "discount_margin", "model_ablation", "neural_training"], 1)],
+             "other_factors", "discount_margin", "model_ablation", "neural_training",
+             "input_associations", "input_ablation"], 1)],
     }

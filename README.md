@@ -18,7 +18,7 @@ This repository contains a reproducible analysis of `stories_transactions.csv`, 
 | `src/recommender.py` | Count-based comparison baselines |
 | `src/train.py` | Chronological split, architecture validation, final six-month refit |
 | `src/evaluate.py` | Held-out and rolling retrospective benchmarks |
-| `src/analysis.py` | Factor analysis, financial scenarios, and eight reproducible plots |
+| `src/analysis.py`, `src/feature_study.py` | Factor and input-ablation experiments, financial scenarios, and ten reproducible plots |
 | `src/economics.py` | Discount, gross profit, and break-even arithmetic |
 | `src/report.py` | PDF assembly from generated results |
 | `src/pipeline.py` | One-command analysis and report build |
@@ -51,7 +51,7 @@ python -m pytest -q
 python -m streamlit run app.py
 ```
 
-The pipeline writes `outputs/results.json`, eight PNGs in `figures/`, `models/nn_recommender.npz`, and `Analysis.pdf`. **Run the pipeline before starting the app.** The app opens in a local browser. Select a branch and first product, then either choose one of two add-ons during the countdown or continue without one. Confirming the demo order writes an event to `demo_state.sqlite3` and applies one online neural gradient step if the order has a complementary product. The SQLite file is ignored by Git. Delete it with the app stopped to reset demo history. The raw CSV and saved base weights are never modified by demo orders.
+The pipeline writes `outputs/results.json`, ten PNGs in `figures/`, `models/nn_recommender.npz`, and `Analysis.pdf`. **Run the pipeline before starting the app.** The app opens in a local browser. Select a branch and first product, then either choose one of two add-ons during the countdown or continue without one. Confirming the demo order writes an event to `demo_state.sqlite3` and applies one online neural gradient step if the order has a complementary product. The SQLite file is ignored by Git. Delete it with the app stopped to reset demo history. The raw CSV and saved base weights are never modified by demo orders.
 
 For this Codex workspace, dependencies were installed into ignored `.deps/` using the bundled x64 Python. The commands above are the portable setup for other machines.
 
@@ -62,6 +62,8 @@ The model takes **only the first product** as input: a one-hot vector over the 4
 The benchmark fits January–March, selects between 16 and 32 hidden units using April validation, and evaluates once on May–June 2026. The final app artifact then refits the selected network on all six months for the preselected epoch count. That post-refit artifact has no untouched test of its own; the reported test metrics belong to the pre-refit model. Because the CSV has no entry order, each multi-product transaction supplies every possible seed product, weighted so the transaction counts once. Hit@2 is the share of these transactions for which at least one of the two recommendations is among the other purchased products. `outputs/results.json` includes losses, Hit@1, Hit@2, category Hit@2, candidate coverage, transaction-level confidence intervals, MRR@2, and branch/daypart splits. The test months had already been discussed in prior project work, so this is retrospective evidence, not a pristine prospective study.
 
 Every raw CSV column is also converted to a numeric representation for an **audit-only** frame, documented in the PDF. Product is the sole network input. IDs, branch, time, prices, discounts, revenue, and gross profit are excluded from model features to prevent leakage and honor the product-only requirement. The one-hot input already has unit norm; no z-score scaling is needed.
+
+The report's input-justification study checks multi-product basket rates by branch, daypart, weekday, month, order type, and customer-ID availability, then compares product-only and context-aware count rules on the chronological held-out set. The measured basket-size associations for those factors are small (Cramer's V below 0.02). Daypart raises the count rule's May-June Hit@2 by 0.27 percentage points, but its paired 95% interval includes zero. A recorded discount has a larger association but is determined during checkout, so it cannot be a first-product input. These diagnostics support a simple product-only starting model; they do not prove contextual data can never help.
 
 ## Revenue and operating decision
 
