@@ -1,0 +1,9 @@
+.venv/
+.deps/
+__pycache__/
+.pytest_cache/
+demo_state.sqlite3
+tmp/
+*.pyc
+# Remove the next line only if Stories explicitly authorizes raw-data publication.
+stories_transactions.csv
