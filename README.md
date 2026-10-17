@@ -1,3 +1,9 @@
+Jawad Kotaich: 202501193
+
+Ali Slim: 202500200
+
+Haydar Hamieh: 202500266
+
 # Stories Coffee: two-product checkout add-on
 
 This repository contains a reproducible analysis of `stories_transactions.csv`, a small online-trainable neural recommender, a local Streamlit checkout demo, and [Analysis.pdf](Analysis.pdf). The demo offers two add-ons for **15 seconds** and applies **15% off only the add-on selected in time**. It does not process real payments.
