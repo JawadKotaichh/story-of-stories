@@ -1,11 +1,11 @@
 # Stories Coffee: two-product checkout add-on
 
-This repository contains a reproducible analysis of `stories_transactions.csv`, a small incrementally updated recommender, a local Streamlit checkout demo, and [Analysis.pdf](Analysis.pdf). The demo offers two add-ons for **15 seconds** and applies **15% off only the add-on selected in time**. It does not process real payments.
+This repository contains a reproducible analysis of `stories_transactions.csv`, a small online-trainable neural recommender, a local Streamlit checkout demo, and [Analysis.pdf](Analysis.pdf). The demo offers two add-ons for **15 seconds** and applies **15% off only the add-on selected in time**. It does not process real payments.
 
 ## What the evidence says
 
 - The supplied CSV contains **51,177 line records** from **33,887 transactions** across three branches, 1 January–30 June 2026. Recorded revenue is **$305,925.14** and recorded gross profit is **$179,430.49**.
-- In the retrospective pseudo-checkout benchmark, the **product-pair rule reached 11.13% Hit@2**, compared with **10.31%** for two globally popular products. Adding daypart or branch reduced Hit@2 on the evaluated later months, so the live demo uses the simpler product-pair rule.
+- The **product-only neural network reached 11.44% Hit@2** on the held-out May–June pseudo-checkout baskets, compared with **10.96%** for a product-pair count baseline and **9.98%** for two globally popular products. This is a modest retrospective prediction improvement, not measured offer conversion.
 - These figures measure whether two suggested products appear in a **completed historical basket**. They do **not** measure whether a prompt increases purchase, revenue, or profit. The CSV contains no recommendation exposures, entry sequence, or treatment assignment. The report gives labelled sensitivity scenarios and a randomized pilot design.
 
 ## Repository contents
@@ -13,14 +13,17 @@ This repository contains a reproducible analysis of `stories_transactions.csv`, 
 | Path | Purpose |
 |---|---|
 | `app.py` | Streamlit customer-facing demo with server-side 15-second expiry and one-time purchase updates |
-| `src/data.py` | CSV validation, audit, and transaction-level baskets |
-| `src/recommender.py` | Smoothed co-purchase model and incremental updates |
-| `src/evaluate.py` | Chronological and rolling retrospective benchmarks |
-| `src/analysis.py` | Factor analysis, financial scenarios, and seven reproducible plots |
+| `src/data.py` | CSV validation, numeric audit encoding, and transaction-level baskets |
+| `src/online_nn.py` | Product-only 16-unit neural recommender and online gradient updates |
+| `src/recommender.py` | Count-based comparison baselines |
+| `src/train.py` | Chronological split, architecture validation, final six-month refit |
+| `src/evaluate.py` | Held-out and rolling retrospective benchmarks |
+| `src/analysis.py` | Factor analysis, financial scenarios, and eight reproducible plots |
 | `src/economics.py` | Discount, gross profit, and break-even arithmetic |
 | `src/report.py` | PDF assembly from generated results |
 | `src/pipeline.py` | One-command analysis and report build |
-| `figures/`, `outputs/results.json` | Generated plots and full computed tables |
+| `models/nn_recommender.npz` | Saved six-month neural weights and product vocabulary |
+| `figures/`, `outputs/results.json` | Generated plots, training curves, and computed tables |
 | `Analysis.pdf` | Reviewed analysis and pilot proposal |
 | `IMPLEMENTATION_PLAN.md` | Original detailed implementation plan |
 
@@ -48,15 +51,17 @@ python -m pytest -q
 python -m streamlit run app.py
 ```
 
-The pipeline writes `outputs/results.json`, seven PNGs in `figures/`, and `Analysis.pdf`. The app opens in a local browser. Select a branch and first product, then either choose one of two add-ons during the countdown or continue without one. Confirming the demo order writes an event to `demo_state.sqlite3` and updates the in-memory recommender exactly once. The SQLite file is ignored by Git. Delete it with the app stopped to reset demo history. The raw CSV is never modified.
+The pipeline writes `outputs/results.json`, eight PNGs in `figures/`, `models/nn_recommender.npz`, and `Analysis.pdf`. **Run the pipeline before starting the app.** The app opens in a local browser. Select a branch and first product, then either choose one of two add-ons during the countdown or continue without one. Confirming the demo order writes an event to `demo_state.sqlite3` and applies one online neural gradient step if the order has a complementary product. The SQLite file is ignored by Git. Delete it with the app stopped to reset demo history. The raw CSV and saved base weights are never modified by demo orders.
 
 For this Codex workspace, dependencies were installed into ignored `.deps/` using the bundled x64 Python. The commands above are the portable setup for other machines.
 
 ## Model and evaluation
 
-The model counts distinct product pairs within transactions and divides smoothed pair counts by the number of baskets containing the first product. Global product popularity supplies a prior for sparse pairs. It returns two distinct menu products with positive recorded unit gross profit after a hypothetical 15% discount. After a confirmed order, its sufficient statistics update once using the order's event ID; showing an offer does not train it.
+The model takes **only the first product** as input: a one-hot vector over the 45 products. It has one 16-unit tanh hidden layer and a masked softmax over the other products. It returns the top two distinct products. Targets are the other distinct products in a completed basket, normalized to sum to one; each transaction contributes total weight one across possible seed orientations. It trains with Adam and transaction-weighted cross-entropy. After a confirmed multi-product order, one online SGD step updates the in-memory model exactly once using the order's event ID; showing or clicking an offer does not train it. On restart, completed demo orders replay from SQLite onto the saved six-month base model.
 
-The benchmark fits January–March and evaluates April–June 2026. Because the CSV has no entry order, each multi-product transaction supplies every possible seed product, weighted so the transaction counts once. Hit@2 is the share of these transactions for which at least one of the two recommendations is among the other purchased products. `outputs/results.json` includes Hit@1, Hit@2, category Hit@2, candidate coverage, transaction-level confidence intervals, MRR@2, branch/daypart splits, and rolling monthly checks. Later months had already been explored in the prior proposal, so this is retrospective robustness evidence, not a pristine blind test.
+The benchmark fits January–March, selects between 16 and 32 hidden units using April validation, and evaluates once on May–June 2026. The final app artifact then refits the selected network on all six months for the preselected epoch count. That post-refit artifact has no untouched test of its own; the reported test metrics belong to the pre-refit model. Because the CSV has no entry order, each multi-product transaction supplies every possible seed product, weighted so the transaction counts once. Hit@2 is the share of these transactions for which at least one of the two recommendations is among the other purchased products. `outputs/results.json` includes losses, Hit@1, Hit@2, category Hit@2, candidate coverage, transaction-level confidence intervals, MRR@2, and branch/daypart splits. The test months had already been discussed in prior project work, so this is retrospective evidence, not a pristine prospective study.
+
+Every raw CSV column is also converted to a numeric representation for an **audit-only** frame, documented in the PDF. Product is the sole network input. IDs, branch, time, prices, discounts, revenue, and gross profit are excluded from model features to prevent leakage and honor the product-only requirement. The one-hot input already has unit norm; no z-score scaling is needed.
 
 ## Revenue and operating decision
 

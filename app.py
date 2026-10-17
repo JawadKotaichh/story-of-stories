@@ -9,9 +9,10 @@ from zoneinfo import ZoneInfo
 
 import streamlit as st
 
-from src.data import build_baskets, load_lines, price_book
+from src.data import load_lines, price_book
 from src.economics import add_on_economics, money
-from src.recommender import IncrementalRecommender, make_demo_basket
+from src.online_nn import OnlineNeuralRecommender
+from src.recommender import make_demo_basket
 
 ROOT = Path(__file__).resolve().parent
 CSV = ROOT / "stories_transactions.csv"
@@ -29,13 +30,15 @@ def connection():
     return con
 
 
-@st.cache_resource(show_spinner="Training from the supplied transactions...")
+@st.cache_resource(show_spinner="Loading the trained neural model...")
 def resources():
     df = load_lines(CSV)
-    baskets = build_baskets(df)
     book = price_book(df)
-    products = sorted(df["Product"].unique().tolist())
-    model = IncrementalRecommender(products, mode="pair").fit(baskets)
+    model_path = ROOT / "models" / "nn_recommender.npz"
+    if not model_path.exists():
+        raise FileNotFoundError("Trained model missing. Run: python -m src.pipeline")
+    model = OnlineNeuralRecommender.load(model_path)
+    products = model.products
     with connection() as con:
         rows = con.execute("SELECT event_id, completed_utc, branch, seed, selected, revenue, gross_profit FROM completed_orders ORDER BY completed_utc").fetchall()
     for eid, completed, branch, seed, selected, revenue, gp in rows:
@@ -57,7 +60,7 @@ st.caption("Checkout add-on demo · historical recommendations, simulated purcha
 try:
     model, book, products = resources()
 except Exception as exc:
-    st.error(f"Cannot load the local transaction CSV: {exc}")
+    st.error(f"Cannot load the local data or trained model: {exc}")
     st.stop()
 
 stage = st.session_state.get("stage", "select")
@@ -69,9 +72,7 @@ if stage == "select":
         hour = now.hour
         submitted = st.form_submit_button("Add first product", type="primary")
     if submitted:
-        available = {p for p in products if (branch, p) in book and
-                     float(add_on_economics(book[(branch, p)]["price"], book[(branch, p)]["cost"])["discounted_gross_profit"]) > 0}
-        suggestions = model.recommend(seed, branch, hour, available=available)
+        suggestions = model.recommend(seed)
         started = datetime.now(timezone.utc)
         st.session_state.update(stage="offer", branch=branch, seed=seed, hour=hour,
                                 suggestions=suggestions, started_utc=started.isoformat(),
@@ -116,10 +117,9 @@ elif stage == "offer":
     offer_fragment()
     with st.expander("Why these suggestions?"):
         for suggestion in st.session_state.suggestions:
-            st.write(f"{suggestion.product}: appeared with {seed} in {suggestion.pair_count} historical transactions; "
-                     f"{suggestion.context_count} in the selected daypart across branches.")
-        st.caption("The product-pair rule won the retrospective benchmark; adding time did not improve Hit@2. "
-                   "The displayed counts describe past co-purchases, not who will respond to this offer.")
+            st.write(f"{suggestion.product}: model ranking score {suggestion.score:.1%}.")
+        st.caption("The neural model uses only the first product as input. Scores rank historical complements; "
+                   "they are not the probability that this offer will change a customer's purchase.")
 
 elif stage == "review":
     seed, branch, selected = st.session_state.seed, st.session_state.branch, st.session_state.selected

@@ -18,203 +18,416 @@
     },
     "max_revenue_rounding_difference": 0.005
   },
+  "numeric_preprocessing": {
+    "all_raw_fields_numeric": true,
+    "numeric_column_count": 14,
+    "methods": {
+      "Transaction ID": "sorted-category integer code; 33887 observed values; missing=-1",
+      "Branch": "sorted-category integer code; 3 observed values; missing=-1",
+      "Customer ID": "sorted-category integer code; 3494 observed values; missing=-1",
+      "Order Type": "sorted-category integer code; 2 observed values; missing=-1",
+      "Product": "sorted-category integer code; 45 observed values; missing=-1",
+      "Category": "sorted-category integer code; 9 observed values; missing=-1",
+      "Date": "integer days since 1970-01-01; used only for chronological split/EDA",
+      "Time": "integer seconds after midnight; EDA only",
+      "Quantity": "original numeric value; financial audit/scenarios only",
+      "Unit Price (USD)": "original numeric value; financial audit/scenarios only",
+      "Discount Rate": "original numeric value; financial audit/scenarios only",
+      "Unit Cost (USD)": "original numeric value; financial audit/scenarios only",
+      "Line Revenue (USD)": "original numeric value; financial audit/scenarios only",
+      "Line Gross Profit (USD)": "original numeric value; financial audit/scenarios only"
+    }
+  },
   "benchmarks": {
     "train_transactions": 14792,
-    "test_transactions": 19095,
+    "validation_transactions": 5750,
+    "test_transactions": 13345,
     "models": {
       "global": {
-        "transactions": 8801,
-        "hit_at_1": 0.05304321478619841,
-        "hit_at_2": 0.10309434533954526,
+        "transactions": 6186,
+        "hit_at_1": 0.05240327621510936,
+        "hit_at_2": 0.099849121672594,
         "hit_at_2_ci95": [
-          0.09834795618773318,
-          0.10784073449135734
+          0.0942691093469614,
+          0.10542913399822659
         ],
-        "mrr_at_2": 0.07806878006287164,
-        "category_hit_at_2": 0.3329735257357149,
+        "mrr_at_2": 0.0761261989438517,
+        "category_hit_at_2": 0.32945360491431885,
         "candidate_coverage": 1.0,
         "by_group_hit_at_2": {
           "branch:Garden": {
-            "hit_at_2": 0.09688323593445577,
-            "weighted_n": 2909.0000000000186
+            "hit_at_2": 0.09769547325102955,
+            "weighted_n": 2024.9999999999857
           },
           "branch:Harbour": {
-            "hit_at_2": 0.1095911585130209,
-            "weighted_n": 4313.000000000058
+            "hit_at_2": 0.1048008728859784,
+            "weighted_n": 3055.0000000000236
           },
           "branch:Uptown": {
-            "hit_at_2": 0.09679121807050921,
-            "weighted_n": 1578.9999999999923
+            "hit_at_2": 0.09011452682338719,
+            "weighted_n": 1106.0000000000043
           },
           "daypart:evening": {
-            "hit_at_2": 0.12399150743099566,
-            "weighted_n": 3925.000000000059
+            "hit_at_2": 0.12116788321167803,
+            "weighted_n": 2740.0000000000164
           },
           "daypart:midday": {
-            "hit_at_2": 0.08787961447535798,
-            "weighted_n": 3666.00000000005
+            "hit_at_2": 0.08668990446682157,
+            "weighted_n": 2582.0000000000036
           },
           "daypart:morning": {
-            "hit_at_2": 0.08140495867768589,
-            "weighted_n": 1210.000000000001
+            "hit_at_2": 0.07156635802469118,
+            "weighted_n": 864.0000000000023
           }
         }
       },
       "daypart": {
-        "transactions": 8801,
-        "hit_at_1": 0.05533462106578784,
-        "hit_at_2": 0.1036245881149875,
+        "transactions": 6186,
+        "hit_at_1": 0.05472033624312962,
+        "hit_at_2": 0.1025164349606639,
         "hit_at_2_ci95": [
-          0.09896887031271202,
-          0.10828030591726297
+          0.0969703155583537,
+          0.1080625543629741
         ],
-        "mrr_at_2": 0.0794796045903874,
-        "category_hit_at_2": 0.3693140930954871,
+        "mrr_at_2": 0.07861838560189674,
+        "category_hit_at_2": 0.3699213277292795,
         "candidate_coverage": 1.0,
         "by_group_hit_at_2": {
           "branch:Garden": {
-            "hit_at_2": 0.09631030136358376,
-            "weighted_n": 2909.0000000000186
+            "hit_at_2": 0.09646090534979501,
+            "weighted_n": 2024.9999999999857
           },
           "branch:Harbour": {
-            "hit_at_2": 0.10951387278769434,
-            "weighted_n": 4313.000000000058
+            "hit_at_2": 0.10900163666121017,
+            "weighted_n": 3055.0000000000236
           },
           "branch:Uptown": {
-            "hit_at_2": 0.10101329955668187,
-            "weighted_n": 1578.9999999999923
+            "hit_at_2": 0.09569017480409846,
+            "weighted_n": 1106.0000000000043
           },
           "daypart:evening": {
-            "hit_at_2": 0.12016985138004034,
-            "weighted_n": 3925.000000000059
+            "hit_at_2": 0.11806569343065615,
+            "weighted_n": 2740.0000000000164
           },
           "daypart:midday": {
-            "hit_at_2": 0.08474268048736022,
-            "weighted_n": 3666.00000000005
+            "hit_at_2": 0.08559256390395038,
+            "weighted_n": 2582.0000000000036
           },
           "daypart:morning": {
-            "hit_at_2": 0.10716253443526155,
-            "weighted_n": 1210.000000000001
+            "hit_at_2": 0.10378086419753055,
+            "weighted_n": 864.0000000000023
           }
         }
       },
       "pair": {
-        "transactions": 8801,
-        "hit_at_1": 0.05881907359012217,
-        "hit_at_2": 0.11127523387493901,
+        "transactions": 6186,
+        "hit_at_1": 0.056875740920357715,
+        "hit_at_2": 0.10960232783705161,
         "hit_at_2_ci95": [
-          0.10632809422860467,
-          0.11622237352127335
+          0.10372886455775421,
+          0.11547579111634901
         ],
-        "mrr_at_2": 0.08504715373253036,
-        "category_hit_at_2": 0.33740484035905255,
+        "mrr_at_2": 0.08323903437870461,
+        "category_hit_at_2": 0.3355695656859544,
         "candidate_coverage": 1.0,
         "by_group_hit_at_2": {
           "branch:Garden": {
-            "hit_at_2": 0.10828463389480848,
-            "weighted_n": 2909.0000000000186
+            "hit_at_2": 0.10913580246913669,
+            "weighted_n": 2024.9999999999857
           },
           "branch:Harbour": {
-            "hit_at_2": 0.11430558775793921,
-            "weighted_n": 4313.000000000058
+            "hit_at_2": 0.11314784506273771,
+            "weighted_n": 3055.0000000000236
           },
           "branch:Uptown": {
-            "hit_at_2": 0.10850749419463851,
-            "weighted_n": 1578.9999999999923
+            "hit_at_2": 0.1006630500301382,
+            "weighted_n": 1106.0000000000043
           },
           "daypart:evening": {
-            "hit_at_2": 0.1250106157112504,
-            "weighted_n": 3925.000000000059
+            "hit_at_2": 0.12469586374695774,
+            "weighted_n": 2740.0000000000164
           },
           "daypart:midday": {
-            "hit_at_2": 0.10183669758137692,
-            "weighted_n": 3666.00000000005
+            "hit_at_2": 0.10050348567002323,
+            "weighted_n": 2582.0000000000036
           },
           "daypart:morning": {
-            "hit_at_2": 0.09531680440771342,
-            "weighted_n": 1210.000000000001
+            "hit_at_2": 0.08892746913580223,
+            "weighted_n": 864.0000000000023
           }
         }
       },
       "pair_daypart": {
-        "transactions": 8801,
-        "hit_at_1": 0.05787221149111826,
-        "hit_at_2": 0.1074120365110031,
+        "transactions": 6186,
+        "hit_at_1": 0.05719905162194194,
+        "hit_at_2": 0.10572259941804085,
         "hit_at_2_ci95": [
-          0.10235176824749025,
-          0.11247230477451596
+          0.09968290348327281,
+          0.11176229535280889
         ],
-        "mrr_at_2": 0.08264212400106055,
-        "category_hit_at_2": 0.37221149111843865,
+        "mrr_at_2": 0.08146082551999131,
+        "category_hit_at_2": 0.36913999353378435,
         "candidate_coverage": 1.0,
         "by_group_hit_at_2": {
           "branch:Garden": {
-            "hit_at_2": 0.10553454795462293,
-            "weighted_n": 2909.0000000000186
+            "hit_at_2": 0.105349794238684,
+            "weighted_n": 2024.9999999999857
           },
           "branch:Harbour": {
-            "hit_at_2": 0.11024808717829633,
-            "weighted_n": 4313.000000000058
+            "hit_at_2": 0.10981996726677483,
+            "weighted_n": 3055.0000000000236
           },
           "branch:Uptown": {
-            "hit_at_2": 0.10312434029976825,
-            "weighted_n": 1578.9999999999923
+            "hit_at_2": 0.09508740204942698,
+            "weighted_n": 1106.0000000000043
           },
           "daypart:evening": {
-            "hit_at_2": 0.1227600849256878,
-            "weighted_n": 3925.000000000059
+            "hit_at_2": 0.12055961070559526,
+            "weighted_n": 2740.0000000000164
           },
           "daypart:midday": {
-            "hit_at_2": 0.09328968903436861,
-            "weighted_n": 3666.00000000005
+            "hit_at_2": 0.09327394784404851,
+            "weighted_n": 2582.0000000000036
           },
           "daypart:morning": {
-            "hit_at_2": 0.10041322314049572,
-            "weighted_n": 1210.000000000001
+            "hit_at_2": 0.09587191358024665,
+            "weighted_n": 864.0000000000023
           }
         }
       },
       "pair_branch_daypart": {
-        "transactions": 8801,
-        "hit_at_1": 0.051944854751353894,
-        "hit_at_2": 0.09851153278036635,
+        "transactions": 6186,
+        "hit_at_1": 0.05221467830585194,
+        "hit_at_2": 0.09718180838452407,
         "hit_at_2_ci95": [
-          0.09357465605455983,
-          0.10344840950617287
+          0.09133429062062298,
+          0.10302932614842517
         ],
-        "mrr_at_2": 0.07522819376585993,
-        "category_hit_at_2": 0.3566640154527938,
+        "mrr_at_2": 0.07469824334518804,
+        "category_hit_at_2": 0.35216618170061126,
         "candidate_coverage": 1.0,
         "by_group_hit_at_2": {
           "branch:Garden": {
-            "hit_at_2": 0.09751346396241498,
-            "weighted_n": 2909.0000000000186
+            "hit_at_2": 0.10057613168724358,
+            "weighted_n": 2024.9999999999857
           },
           "branch:Harbour": {
-            "hit_at_2": 0.10271272895895962,
-            "weighted_n": 4313.000000000058
+            "hit_at_2": 0.10343698854337072,
+            "weighted_n": 3055.0000000000236
           },
           "branch:Uptown": {
-            "hit_at_2": 0.08887481528393534,
-            "weighted_n": 1578.9999999999923
+            "hit_at_2": 0.07368896925858921,
+            "weighted_n": 1106.0000000000043
           },
           "daypart:evening": {
-            "hit_at_2": 0.1129511677282358,
-            "weighted_n": 3925.000000000059
+            "hit_at_2": 0.10954987834549818,
+            "weighted_n": 2740.0000000000164
           },
           "daypart:midday": {
-            "hit_at_2": 0.08597017639570716,
-            "weighted_n": 3666.00000000005
+            "hit_at_2": 0.0855280144590756,
+            "weighted_n": 2582.0000000000036
           },
           "daypart:morning": {
-            "hit_at_2": 0.08966942148760317,
-            "weighted_n": 1210.000000000001
+            "hit_at_2": 0.09278549382716025,
+            "weighted_n": 864.0000000000023
+          }
+        }
+      }
+    },
+    "validation_models": {
+      "global": {
+        "transactions": 2615,
+        "hit_at_1": 0.054557042702358186,
+        "hit_at_2": 0.11077119184193757,
+        "hit_at_2_ci95": [
+          0.10177965302665398,
+          0.11976273065722115
+        ],
+        "mrr_at_2": 0.08266411727214788,
+        "category_hit_at_2": 0.34130019120459093,
+        "candidate_coverage": 1.0,
+        "by_group_hit_at_2": {
+          "branch:Garden": {
+            "hit_at_2": 0.09502262443438883,
+            "weighted_n": 884.0000000000031
+          },
+          "branch:Harbour": {
+            "hit_at_2": 0.12122416534181252,
+            "weighted_n": 1257.9999999999995
+          },
+          "branch:Uptown": {
+            "hit_at_2": 0.11240310077519411,
+            "weighted_n": 472.999999999999
+          },
+          "daypart:evening": {
+            "hit_at_2": 0.1305203938115328,
+            "weighted_n": 1185.0000000000016
+          },
+          "daypart:midday": {
+            "hit_at_2": 0.09071340713407096,
+            "weighted_n": 1084.0000000000039
+          },
+          "daypart:morning": {
+            "hit_at_2": 0.10597302504816968,
+            "weighted_n": 345.99999999999966
+          }
+        }
+      },
+      "daypart": {
+        "transactions": 2615,
+        "hit_at_1": 0.05678776290630976,
+        "hit_at_2": 0.10624601657106447,
+        "hit_at_2_ci95": [
+          0.09767815163012675,
+          0.1148138815120022
+        ],
+        "mrr_at_2": 0.08151688973868709,
+        "category_hit_at_2": 0.3678776290631001,
+        "candidate_coverage": 1.0,
+        "by_group_hit_at_2": {
+          "branch:Garden": {
+            "hit_at_2": 0.09596530920060296,
+            "weighted_n": 884.0000000000031
+          },
+          "branch:Harbour": {
+            "hit_at_2": 0.1107578166401696,
+            "weighted_n": 1257.9999999999995
+          },
+          "branch:Uptown": {
+            "hit_at_2": 0.11346018322762545,
+            "weighted_n": 472.999999999999
+          },
+          "daypart:evening": {
+            "hit_at_2": 0.12503516174402227,
+            "weighted_n": 1185.0000000000016
+          },
+          "daypart:midday": {
+            "hit_at_2": 0.08271832718327149,
+            "weighted_n": 1084.0000000000039
+          },
+          "daypart:morning": {
+            "hit_at_2": 0.11560693641618512,
+            "weighted_n": 345.99999999999966
+          }
+        }
+      },
+      "pair": {
+        "transactions": 2615,
+        "hit_at_1": 0.06341618865519441,
+        "hit_at_2": 0.11523263224984065,
+        "hit_at_2_ci95": [
+          0.10605798513682421,
+          0.12440727936285709
+        ],
+        "mrr_at_2": 0.08932441045251752,
+        "category_hit_at_2": 0.34174633524538073,
+        "candidate_coverage": 1.0,
+        "by_group_hit_at_2": {
+          "branch:Garden": {
+            "hit_at_2": 0.10633484162895891,
+            "weighted_n": 884.0000000000031
+          },
+          "branch:Harbour": {
+            "hit_at_2": 0.11711711711711714,
+            "weighted_n": 1257.9999999999995
+          },
+          "branch:Uptown": {
+            "hit_at_2": 0.12684989429175506,
+            "weighted_n": 472.999999999999
+          },
+          "daypart:evening": {
+            "hit_at_2": 0.1257383966244724,
+            "weighted_n": 1185.0000000000016
+          },
+          "daypart:midday": {
+            "hit_at_2": 0.1050123001230008,
+            "weighted_n": 1084.0000000000039
+          },
+          "daypart:morning": {
+            "hit_at_2": 0.1112716763005782,
+            "weighted_n": 345.99999999999966
+          }
+        }
+      },
+      "pair_daypart": {
+        "transactions": 2615,
+        "hit_at_1": 0.059464627151051594,
+        "hit_at_2": 0.11140854047163805,
+        "hit_at_2_ci95": [
+          0.1021394412403793,
+          0.1206776397028968
+        ],
+        "mrr_at_2": 0.08543658381134475,
+        "category_hit_at_2": 0.3794773741236481,
+        "candidate_coverage": 1.0,
+        "by_group_hit_at_2": {
+          "branch:Garden": {
+            "hit_at_2": 0.10595776772247323,
+            "weighted_n": 884.0000000000031
+          },
+          "branch:Harbour": {
+            "hit_at_2": 0.11128775834658185,
+            "weighted_n": 1257.9999999999995
+          },
+          "branch:Uptown": {
+            "hit_at_2": 0.12191684284707571,
+            "weighted_n": 472.999999999999
+          },
+          "daypart:evening": {
+            "hit_at_2": 0.12784810126582258,
+            "weighted_n": 1185.0000000000016
+          },
+          "daypart:midday": {
+            "hit_at_2": 0.09332718327183234,
+            "weighted_n": 1084.0000000000039
+          },
+          "daypart:morning": {
+            "hit_at_2": 0.11175337186897893,
+            "weighted_n": 345.99999999999966
+          }
+        }
+      },
+      "pair_branch_daypart": {
+        "transactions": 2615,
+        "hit_at_1": 0.05130656469088589,
+        "hit_at_2": 0.10165710643722128,
+        "hit_at_2_ci95": [
+          0.09245172555634332,
+          0.11086248731809925
+        ],
+        "mrr_at_2": 0.07648183556405352,
+        "category_hit_at_2": 0.36730401529636947,
+        "candidate_coverage": 1.0,
+        "by_group_hit_at_2": {
+          "branch:Garden": {
+            "hit_at_2": 0.09049773755656078,
+            "weighted_n": 884.0000000000031
+          },
+          "branch:Harbour": {
+            "hit_at_2": 0.1009538950715421,
+            "weighted_n": 1257.9999999999995
+          },
+          "branch:Uptown": {
+            "hit_at_2": 0.12438336856941537,
+            "weighted_n": 472.999999999999
+          },
+          "daypart:evening": {
+            "hit_at_2": 0.12081575246132188,
+            "weighted_n": 1185.0000000000016
+          },
+          "daypart:midday": {
+            "hit_at_2": 0.08702337023370198,
+            "weighted_n": 1084.0000000000039
+          },
+          "daypart:morning": {
+            "hit_at_2": 0.08188824662813109,
+            "weighted_n": 345.99999999999966
           }
         }
       }
     }
   },
-  "best_hit2_mode": "pair",
+  "best_baseline_on_validation": "pair",
   "rolling_best": {
     "2026-04": {
       "transactions": 2615,
@@ -330,6 +543,256 @@
         }
       }
     }
+  },
+  "neural_training": {
+    "architecture": "45 one-hot inputs -> 16 tanh hidden units -> 45 softmax outputs",
+    "input_fields": [
+      "Product"
+    ],
+    "output": "Two highest-scoring distinct other products",
+    "loss": "Transaction-weighted categorical cross-entropy over co-purchased products",
+    "optimizer": "Adam for initial training; SGD for each completed online order",
+    "hyperparameters": {
+      "learning_rate": 0.01,
+      "batch_size": 512,
+      "weight_decay": 0.0001,
+      "max_epochs": 40,
+      "patience": 6,
+      "random_seed": 490,
+      "online_learning_rate": 0.025
+    },
+    "split": {
+      "train": "2026-01-01 to 2026-03-31",
+      "validation": "2026-04-01 to 2026-04-30",
+      "test": "2026-05-01 to 2026-06-30",
+      "train_transactions": 14792,
+      "validation_transactions": 5750,
+      "test_transactions": 13345,
+      "train_multi_product_transactions": 6830,
+      "validation_multi_product_transactions": 2615,
+      "test_multi_product_transactions": 6186
+    },
+    "candidates": [
+      {
+        "hidden_units": 16,
+        "best_epoch": 3,
+        "epochs_run": 9,
+        "validation_loss": 3.678167581856137,
+        "validation_metrics": {
+          "transactions": 2615,
+          "hit_at_1": 0.06265137029955387,
+          "hit_at_2": 0.11389420012746976,
+          "hit_at_2_ci95": [
+            0.10498380530716374,
+            0.12280459494777578
+          ],
+          "mrr_at_2": 0.0882727852135118,
+          "category_hit_at_2": 0.3293180369662219,
+          "candidate_coverage": 1.0,
+          "by_group_hit_at_2": {
+            "branch:Garden": {
+              "hit_at_2": 0.0999245852187025,
+              "weighted_n": 884.0000000000031
+            },
+            "branch:Harbour": {
+              "hit_at_2": 0.11817700052994172,
+              "weighted_n": 1257.9999999999995
+            },
+            "branch:Uptown": {
+              "hit_at_2": 0.12861169837914055,
+              "weighted_n": 472.999999999999
+            },
+            "daypart:evening": {
+              "hit_at_2": 0.12672292545710245,
+              "weighted_n": 1185.0000000000016
+            },
+            "daypart:midday": {
+              "hit_at_2": 0.10162976629766256,
+              "weighted_n": 1084.0000000000039
+            },
+            "daypart:morning": {
+              "hit_at_2": 0.10838150289017356,
+              "weighted_n": 345.99999999999966
+            }
+          }
+        },
+        "history": [
+          {
+            "epoch": 1,
+            "train_loss": 3.6982743293611793,
+            "validation_loss": 3.7018628081861915
+          },
+          {
+            "epoch": 2,
+            "train_loss": 3.6745692065635143,
+            "validation_loss": 3.687038821613243
+          },
+          {
+            "epoch": 3,
+            "train_loss": 3.6588454566749413,
+            "validation_loss": 3.678167581856137
+          },
+          {
+            "epoch": 4,
+            "train_loss": 3.651962141967075,
+            "validation_loss": 3.6795960176242657
+          },
+          {
+            "epoch": 5,
+            "train_loss": 3.647541859111255,
+            "validation_loss": 3.6819016148013546
+          },
+          {
+            "epoch": 6,
+            "train_loss": 3.6442131798553987,
+            "validation_loss": 3.682490542243063
+          },
+          {
+            "epoch": 7,
+            "train_loss": 3.6412392027138067,
+            "validation_loss": 3.68661147842162
+          },
+          {
+            "epoch": 8,
+            "train_loss": 3.6395290931664666,
+            "validation_loss": 3.689111403658228
+          },
+          {
+            "epoch": 9,
+            "train_loss": 3.637934304784359,
+            "validation_loss": 3.6913914393444966
+          }
+        ]
+      },
+      {
+        "hidden_units": 32,
+        "best_epoch": 2,
+        "epochs_run": 8,
+        "validation_loss": 3.6768347338834815,
+        "validation_metrics": {
+          "transactions": 2615,
+          "hit_at_1": 0.06322498406628427,
+          "hit_at_2": 0.11312938177182925,
+          "hit_at_2_ci95": [
+            0.10419593786153437,
+            0.12206282568212413
+          ],
+          "mrr_at_2": 0.08817718291905671,
+          "category_hit_at_2": 0.3244104525175284,
+          "candidate_coverage": 1.0,
+          "by_group_hit_at_2": {
+            "branch:Garden": {
+              "hit_at_2": 0.0999245852187025,
+              "weighted_n": 884.0000000000031
+            },
+            "branch:Harbour": {
+              "hit_at_2": 0.11565977742448326,
+              "weighted_n": 1257.9999999999995
+            },
+            "branch:Uptown": {
+              "hit_at_2": 0.13107822410148023,
+              "weighted_n": 472.999999999999
+            },
+            "daypart:evening": {
+              "hit_at_2": 0.1292545710267227,
+              "weighted_n": 1185.0000000000016
+            },
+            "daypart:midday": {
+              "hit_at_2": 0.09824723247232432,
+              "weighted_n": 1084.0000000000039
+            },
+            "daypart:morning": {
+              "hit_at_2": 0.10452793834296736,
+              "weighted_n": 345.99999999999966
+            }
+          }
+        },
+        "history": [
+          {
+            "epoch": 1,
+            "train_loss": 3.6829816712729446,
+            "validation_loss": 3.692102335953169
+          },
+          {
+            "epoch": 2,
+            "train_loss": 3.655869094247393,
+            "validation_loss": 3.6768347338834815
+          },
+          {
+            "epoch": 3,
+            "train_loss": 3.6450923561616237,
+            "validation_loss": 3.678086369619536
+          },
+          {
+            "epoch": 4,
+            "train_loss": 3.6387855392163795,
+            "validation_loss": 3.684005747285183
+          },
+          {
+            "epoch": 5,
+            "train_loss": 3.6338861519547287,
+            "validation_loss": 3.6868366877154317
+          },
+          {
+            "epoch": 6,
+            "train_loss": 3.630374670220219,
+            "validation_loss": 3.689313168932483
+          },
+          {
+            "epoch": 7,
+            "train_loss": 3.6277694391352444,
+            "validation_loss": 3.694795496987534
+          },
+          {
+            "epoch": 8,
+            "train_loss": 3.626389612348384,
+            "validation_loss": 3.6979538977318436
+          }
+        ]
+      }
+    ],
+    "selected_hidden_units": 16,
+    "selected_epoch": 3,
+    "test_metrics": {
+      "transactions": 6186,
+      "hit_at_1": 0.06207565470417062,
+      "hit_at_2": 0.11442504580234968,
+      "hit_at_2_ci95": [
+        0.1085562392809427,
+        0.12029385232375665
+      ],
+      "mrr_at_2": 0.08825035025326004,
+      "category_hit_at_2": 0.3230682185580311,
+      "candidate_coverage": 1.0,
+      "by_group_hit_at_2": {
+        "branch:Garden": {
+          "hit_at_2": 0.11695473251028897,
+          "weighted_n": 2024.9999999999857
+        },
+        "branch:Harbour": {
+          "hit_at_2": 0.11560283687943156,
+          "weighted_n": 3055.0000000000236
+        },
+        "branch:Uptown": {
+          "hit_at_2": 0.10654008438818517,
+          "weighted_n": 1106.0000000000043
+        },
+        "daypart:evening": {
+          "hit_at_2": 0.13242092457420818,
+          "weighted_n": 2740.0000000000164
+        },
+        "daypart:midday": {
+          "hit_at_2": 0.10398915569326098,
+          "weighted_n": 2582.0000000000036
+        },
+        "daypart:morning": {
+          "hit_at_2": 0.08854166666666644,
+          "weighted_n": 864.0000000000023
+        }
+      }
+    },
+    "deployed_retrained_on_all_six_months": true,
+    "model_artifact": "nn_recommender.npz"
   },
   "pair_example": {
     "seed": "Iced Matcha",
@@ -583,9 +1046,9 @@
   },
   "portfolio_scenarios": {
     "completed_one_product_baskets_proxy": 18256,
-    "average_of_two_offered_discounted_prices": 4.5174,
-    "average_of_two_offered_discounted_gross_profits": 2.4713,
-    "average_of_two_offered_discount_concessions": 0.7967,
+    "average_of_two_offered_discounted_prices": 4.563,
+    "average_of_two_offered_discounted_gross_profits": 2.4058,
+    "average_of_two_offered_discount_concessions": 0.805,
     "choice_mix_assumption": "50/50 among the two shown products, conditional on purchase",
     "operating_cost_assumptions": {
       "per_new_add_on": 0.25,
@@ -597,110 +1060,110 @@
       {
         "new_add_on_rate_assumed": 0.01,
         "existing_buyers_discounted_rate_assumed": 0,
-        "revenue_per_offer": 0.0452,
-        "gross_profit_per_offer": 0.0247,
-        "six_month_revenue_proxy": 824.7,
-        "six_month_gross_profit_proxy": 451.16,
-        "six_month_net_proxy_after_assumed_costs": -609.6
+        "revenue_per_offer": 0.0456,
+        "gross_profit_per_offer": 0.0241,
+        "six_month_revenue_proxy": 833.01,
+        "six_month_gross_profit_proxy": 439.2,
+        "six_month_net_proxy_after_assumed_costs": -621.56
       },
       {
         "new_add_on_rate_assumed": 0.01,
         "existing_buyers_discounted_rate_assumed": 0.05,
-        "revenue_per_offer": 0.0053,
-        "gross_profit_per_offer": -0.0151,
-        "six_month_revenue_proxy": 97.5,
-        "six_month_gross_profit_proxy": -276.04,
-        "six_month_net_proxy_after_assumed_costs": -1336.8
+        "revenue_per_offer": 0.0054,
+        "gross_profit_per_offer": -0.0162,
+        "six_month_revenue_proxy": 98.25,
+        "six_month_gross_profit_proxy": -295.56,
+        "six_month_net_proxy_after_assumed_costs": -1356.32
       },
       {
         "new_add_on_rate_assumed": 0.01,
         "existing_buyers_discounted_rate_assumed": 0.1,
-        "revenue_per_offer": -0.0345,
-        "gross_profit_per_offer": -0.055,
-        "six_month_revenue_proxy": -629.7,
-        "six_month_gross_profit_proxy": -1003.24,
-        "six_month_net_proxy_after_assumed_costs": -2064.0
+        "revenue_per_offer": -0.0349,
+        "gross_profit_per_offer": -0.0564,
+        "six_month_revenue_proxy": -636.51,
+        "six_month_gross_profit_proxy": -1030.32,
+        "six_month_net_proxy_after_assumed_costs": -2091.08
       },
       {
         "new_add_on_rate_assumed": 0.03,
         "existing_buyers_discounted_rate_assumed": 0,
-        "revenue_per_offer": 0.1355,
-        "gross_profit_per_offer": 0.0741,
-        "six_month_revenue_proxy": 2474.09,
-        "six_month_gross_profit_proxy": 1353.47,
-        "six_month_net_proxy_after_assumed_costs": 201.43
+        "revenue_per_offer": 0.1369,
+        "gross_profit_per_offer": 0.0722,
+        "six_month_revenue_proxy": 2499.04,
+        "six_month_gross_profit_proxy": 1317.6,
+        "six_month_net_proxy_after_assumed_costs": 165.56
       },
       {
         "new_add_on_rate_assumed": 0.03,
         "existing_buyers_discounted_rate_assumed": 0.05,
-        "revenue_per_offer": 0.0957,
-        "gross_profit_per_offer": 0.0343,
-        "six_month_revenue_proxy": 1746.89,
-        "six_month_gross_profit_proxy": 626.27,
-        "six_month_net_proxy_after_assumed_costs": -525.77
+        "revenue_per_offer": 0.0966,
+        "gross_profit_per_offer": 0.0319,
+        "six_month_revenue_proxy": 1764.28,
+        "six_month_gross_profit_proxy": 582.83,
+        "six_month_net_proxy_after_assumed_costs": -569.21
       },
       {
         "new_add_on_rate_assumed": 0.03,
         "existing_buyers_discounted_rate_assumed": 0.1,
-        "revenue_per_offer": 0.0559,
-        "gross_profit_per_offer": -0.0055,
-        "six_month_revenue_proxy": 1019.69,
-        "six_month_gross_profit_proxy": -100.93,
-        "six_month_net_proxy_after_assumed_costs": -1252.97
+        "revenue_per_offer": 0.0564,
+        "gross_profit_per_offer": -0.0083,
+        "six_month_revenue_proxy": 1029.51,
+        "six_month_gross_profit_proxy": -151.93,
+        "six_month_net_proxy_after_assumed_costs": -1303.97
       },
       {
         "new_add_on_rate_assumed": 0.05,
         "existing_buyers_discounted_rate_assumed": 0,
-        "revenue_per_offer": 0.2259,
-        "gross_profit_per_offer": 0.1236,
-        "six_month_revenue_proxy": 4123.49,
-        "six_month_gross_profit_proxy": 2255.78,
-        "six_month_net_proxy_after_assumed_costs": 1012.46
+        "revenue_per_offer": 0.2281,
+        "gross_profit_per_offer": 0.1203,
+        "six_month_revenue_proxy": 4165.06,
+        "six_month_gross_profit_proxy": 2195.99,
+        "six_month_net_proxy_after_assumed_costs": 952.67
       },
       {
         "new_add_on_rate_assumed": 0.05,
         "existing_buyers_discounted_rate_assumed": 0.05,
-        "revenue_per_offer": 0.186,
-        "gross_profit_per_offer": 0.0837,
-        "six_month_revenue_proxy": 3396.29,
-        "six_month_gross_profit_proxy": 1528.58,
-        "six_month_net_proxy_after_assumed_costs": 285.26
+        "revenue_per_offer": 0.1879,
+        "gross_profit_per_offer": 0.08,
+        "six_month_revenue_proxy": 3430.3,
+        "six_month_gross_profit_proxy": 1461.23,
+        "six_month_net_proxy_after_assumed_costs": 217.91
       },
       {
         "new_add_on_rate_assumed": 0.05,
         "existing_buyers_discounted_rate_assumed": 0.1,
-        "revenue_per_offer": 0.1462,
-        "gross_profit_per_offer": 0.0439,
-        "six_month_revenue_proxy": 2669.09,
-        "six_month_gross_profit_proxy": 801.38,
-        "six_month_net_proxy_after_assumed_costs": -441.94
+        "revenue_per_offer": 0.1477,
+        "gross_profit_per_offer": 0.0398,
+        "six_month_revenue_proxy": 2695.54,
+        "six_month_gross_profit_proxy": 726.47,
+        "six_month_net_proxy_after_assumed_costs": -516.85
       },
       {
         "new_add_on_rate_assumed": 0.1,
         "existing_buyers_discounted_rate_assumed": 0,
-        "revenue_per_offer": 0.4517,
-        "gross_profit_per_offer": 0.2471,
-        "six_month_revenue_proxy": 8246.97,
-        "six_month_gross_profit_proxy": 4511.55,
-        "six_month_net_proxy_after_assumed_costs": 3040.03
+        "revenue_per_offer": 0.4563,
+        "gross_profit_per_offer": 0.2406,
+        "six_month_revenue_proxy": 8330.13,
+        "six_month_gross_profit_proxy": 4391.98,
+        "six_month_net_proxy_after_assumed_costs": 2920.46
       },
       {
         "new_add_on_rate_assumed": 0.1,
         "existing_buyers_discounted_rate_assumed": 0.05,
-        "revenue_per_offer": 0.4119,
-        "gross_profit_per_offer": 0.2073,
-        "six_month_revenue_proxy": 7519.77,
-        "six_month_gross_profit_proxy": 3784.35,
-        "six_month_net_proxy_after_assumed_costs": 2312.83
+        "revenue_per_offer": 0.416,
+        "gross_profit_per_offer": 0.2003,
+        "six_month_revenue_proxy": 7595.36,
+        "six_month_gross_profit_proxy": 3657.22,
+        "six_month_net_proxy_after_assumed_costs": 2185.7
       },
       {
         "new_add_on_rate_assumed": 0.1,
         "existing_buyers_discounted_rate_assumed": 0.1,
-        "revenue_per_offer": 0.3721,
-        "gross_profit_per_offer": 0.1675,
-        "six_month_revenue_proxy": 6792.58,
-        "six_month_gross_profit_proxy": 3057.15,
-        "six_month_net_proxy_after_assumed_costs": 1585.63
+        "revenue_per_offer": 0.3758,
+        "gross_profit_per_offer": 0.1601,
+        "six_month_revenue_proxy": 6860.6,
+        "six_month_gross_profit_proxy": 2922.46,
+        "six_month_net_proxy_after_assumed_costs": 1450.94
       }
     ]
   },
@@ -711,6 +1174,7 @@
     "04_example_pair.png",
     "05_other_factors.png",
     "06_discount_margin.png",
-    "07_model_ablation.png"
+    "07_model_ablation.png",
+    "08_neural_training.png"
   ]
 }

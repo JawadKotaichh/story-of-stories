@@ -1,5 +1,7 @@
 # ProfitPilot: A Context-Aware, Profit-Safe Checkout Decision Engine
 
+> **Historical proposal:** This document predates the implemented product-only neural recommender. Its earlier model metrics and full-price-offer concept are superseded by `README.md` and `Analysis.pdf`, which describe the current two-add-on, 15-second, 15%-off prototype and its train/validation/test evaluation.
+
 **EECE490 — Stories Coffee Hackathon**  
 **Status:** Research-backed project proposal, **not** a claim of proven business uplift  
 **Prepared:** 17 October 2026  

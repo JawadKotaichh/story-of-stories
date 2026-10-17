@@ -10,10 +10,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from .data import Basket, audit, daypart, price_book
+from .data import Basket, audit, daypart, price_book, numeric_audit_frame
 from .economics import add_on_economics, break_even_new_rate, scenario_per_offer
 from .evaluate import benchmark, rolling_benchmark
-from .recommender import IncrementalRecommender
+from .online_nn import OnlineNeuralRecommender
+from .train import train_and_select
 
 COLORS = ["#2B4C3F", "#BA693B", "#D8AE55", "#718E88", "#8A6B77", "#B3C9B7",
           "#536B91", "#AFC2D5", "#D49592"]
@@ -35,16 +36,18 @@ def _wilson(success: int, total: int) -> tuple[float, float]:
     return mid-half, mid+half
 
 
-def analyze(df: pd.DataFrame, baskets: list[Basket], figures: Path) -> dict:
+def analyze(df: pd.DataFrame, baskets: list[Basket], figures: Path, model_artifact: Path) -> dict:
     figures.mkdir(parents=True, exist_ok=True)
     plt.rcParams.update({"font.size": 9, "axes.spines.top": False,
                          "axes.spines.right": False, "figure.facecolor": "white"})
     base = audit(df)
+    numeric_frame, numeric_methods = numeric_audit_frame(df)
     products = sorted(df["Product"].unique().tolist())
     categories = df.drop_duplicates("Product").set_index("Product")["Category"].astype(str).to_dict()
     bench = benchmark(baskets, products, categories)
-    best = max(bench["models"], key=lambda m: bench["models"][m]["hit_at_2"])
+    best = max(bench["validation_models"], key=lambda m: bench["validation_models"][m]["hit_at_2"])
     rolling = rolling_benchmark(baskets, products, best, categories)
+    neural = train_and_select(baskets, categories, figures, model_artifact)
 
     tx = pd.DataFrame([{
         "id": b.transaction_id, "branch": b.branch, "hour": b.timestamp.hour,
@@ -158,8 +161,8 @@ def analyze(df: pd.DataFrame, baskets: list[Basket], figures: Path) -> dict:
 
     # 7. Model ablation.
     fig, ax = plt.subplots(figsize=(9, 3.7))
-    names = list(bench["models"])
-    vals = [bench["models"][m]["hit_at_2"]*100 for m in names]
+    names = list(bench["models"]) + ["neural_network"]
+    vals = [bench["models"][m]["hit_at_2"]*100 for m in bench["models"]] + [neural["test_metrics"]["hit_at_2"]*100]
     ax.bar([m.replace("_", "\n") for m in names], vals, color=COLORS[:len(names)])
     ax.set(title="Retrospective held-period Hit@2", ylabel="Percent of multi-product baskets")
     for i, value in enumerate(vals):
@@ -178,7 +181,7 @@ def analyze(df: pd.DataFrame, baskets: list[Basket], figures: Path) -> dict:
     seed_only = [b for b in seed_baskets if len(b.products) == 1]
     # Descriptive policy mix over completed one-product baskets. This is not
     # historical offer eligibility or a response estimate.
-    final_model = IncrementalRecommender(products, "pair").fit(baskets)
+    final_model = OnlineNeuralRecommender.load(model_artifact)
     discounted_prices, margins, concessions = [], [], []
     single_baskets = [b for b in baskets if len(b.products) == 1]
     for b in single_baskets:
@@ -209,7 +212,11 @@ def analyze(df: pd.DataFrame, baskets: list[Basket], figures: Path) -> dict:
                 "six_month_net_proxy_after_assumed_costs": round(net_per_offer*len(single_baskets)-6*25-500, 2),
             })
     return {
-        "audit": base, "benchmarks": bench, "best_hit2_mode": best, "rolling_best": rolling,
+        "audit": base, "numeric_preprocessing": {"all_raw_fields_numeric": True,
+                                                   "numeric_column_count": len(numeric_frame.columns),
+                                                   "methods": numeric_methods},
+        "benchmarks": bench, "best_baseline_on_validation": best, "rolling_best": rolling,
+        "neural_training": neural,
         "pair_example": {"seed": seed, "addon": addon,
                          "total_pair_transactions": pair_count[tuple(sorted((seed, addon)))],
                          "by_branch_period": pair_rows},
@@ -233,5 +240,5 @@ def analyze(df: pd.DataFrame, baskets: list[Basket], figures: Path) -> dict:
         },
         "figure_names": [f"{i:02d}_{name}.png" for i, name in enumerate(
             ["hour_branch", "category_daypart", "pair_lift", "example_pair",
-             "other_factors", "discount_margin", "model_ablation"], 1)],
+             "other_factors", "discount_margin", "model_ablation", "neural_training"], 1)],
     }

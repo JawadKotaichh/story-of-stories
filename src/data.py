@@ -112,3 +112,32 @@ def price_book(df: pd.DataFrame) -> dict[tuple[str, str], dict[str, float]]:
         }
         for (branch, product), part in grouped
     }
+
+
+def numeric_audit_frame(df: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, str]]:
+    """Numeric audit copy of every raw field; never passed to the product-only model.
+
+    Encoding identifiers and future basket outcomes as model inputs would leak
+    information. This copy exists only to document data types and EDA handling.
+    """
+    out = pd.DataFrame(index=df.index)
+    methods = {}
+    categorical = ["Transaction ID", "Branch", "Customer ID", "Order Type", "Product", "Category"]
+    for col in categorical:
+        known = sorted(df[col].dropna().astype(str).unique())
+        mapping = {value: i for i, value in enumerate(known)}
+        out[col] = df[col].astype("string").map(mapping).fillna(-1).astype("int32")
+        methods[col] = f"sorted-category integer code; {len(known)} observed values; missing=-1"
+    out["Date"] = (pd.to_datetime(df["Date"]) - pd.Timestamp("1970-01-01")).dt.days.astype("int32")
+    methods["Date"] = "integer days since 1970-01-01; used only for chronological split/EDA"
+    seconds = pd.to_timedelta(df["Time"]).dt.total_seconds()
+    out["Time"] = seconds.astype("int32")
+    methods["Time"] = "integer seconds after midnight; EDA only"
+    numeric = ["Quantity", "Unit Price (USD)", "Discount Rate", "Unit Cost (USD)",
+               "Line Revenue (USD)", "Line Gross Profit (USD)"]
+    for col in numeric:
+        out[col] = pd.to_numeric(df[col], errors="raise")
+        methods[col] = "original numeric value; financial audit/scenarios only"
+    if set(out.columns) != REQUIRED or not all(pd.api.types.is_numeric_dtype(t) for t in out.dtypes):
+        raise AssertionError("Numeric audit encoding did not cover every CSV field")
+    return out, methods

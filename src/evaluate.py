@@ -60,12 +60,16 @@ def evaluate_model(model: IncrementalRecommender, baskets: list[Basket],
 def benchmark(baskets: list[Basket], products: list[str],
               categories: dict[str, str] | None = None) -> dict:
     train = [b for b in baskets if b.timestamp.date() < date(2026, 4, 1)]
-    test = [b for b in baskets if b.timestamp.date() >= date(2026, 4, 1)]
-    results = {}
+    validation = [b for b in baskets if date(2026, 4, 1) <= b.timestamp.date() < date(2026, 5, 1)]
+    test = [b for b in baskets if b.timestamp.date() >= date(2026, 5, 1)]
+    results, validation_results = {}, {}
     for mode in MODES:
         model = IncrementalRecommender(products, mode).fit(train)
+        validation_results[mode] = evaluate_model(model, validation, categories)
         results[mode] = evaluate_model(model, test, categories)
-    return {"train_transactions": len(train), "test_transactions": len(test), "models": results}
+    return {"train_transactions": len(train), "validation_transactions": len(validation),
+            "test_transactions": len(test), "models": results,
+            "validation_models": validation_results}
 
 
 def rolling_benchmark(baskets: list[Basket], products: list[str], mode: str,

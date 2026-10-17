@@ -67,11 +67,12 @@ def build_report(results: dict, figures: Path, output: Path):
 
     audit = results["audit"]
     bench = results["benchmarks"]
+    neural = results["neural_training"]
     example = results["example_economics"]
     pair = results["pair_example"]
 
     p("STORIES COFFEE", "SmallX")
-    p("Two-product checkout offer:<br/>evidence, model, and economics", "CoverTitle")
+    p("Product-only neural recommendations:<br/>training, evidence, and economics", "CoverTitle")
     p("Reproducible analysis of the supplied transaction CSV | 17 October 2026", "BodyX")
     story.append(Spacer(1, 15))
     heading("Executive decision")
@@ -83,19 +84,19 @@ def build_report(results: dict, figures: Path, output: Path):
       "figures in this report as a forecast.")
     popularity = bench["models"]["global"]
     product_pair = bench["models"]["pair"]
-    with_time = bench["models"]["pair_daypart"]
-    pp_gain = (product_pair["hit_at_2"] - popularity["hit_at_2"]) * 100
+    nn_test = neural["test_metrics"]
+    nn_gain = (nn_test["hit_at_2"] - popularity["hit_at_2"]) * 100
     cases = results["portfolio_scenarios"]["scenarios"]
     case_5_5 = next(s for s in cases if s["new_add_on_rate_assumed"] == .05 and
                     s["existing_buyers_discounted_rate_assumed"] == .05)
     case_5_10 = next(s for s in cases if s["new_add_on_rate_assumed"] == .05 and
                      s["existing_buyers_discounted_rate_assumed"] == .10)
     heading("Did the idea improve anything?")
-    p(f"<b>Historical prediction: modestly.</b> On {product_pair['transactions']:,} later-period "
-      f"multi-product baskets, the selected product-pair rule achieved {product_pair['hit_at_2']:.2%} "
-      f"Hit@2 versus {popularity['hit_at_2']:.2%} for two popular items, a {pp_gain:.2f} "
-      f"percentage-point gain. Adding daypart reached {with_time['hit_at_2']:.2%}, so it was omitted "
-      "from the live rule. This is retrospective prediction, not customer response to a prompt.")
+    p(f"<b>Historical prediction: modestly.</b> On {nn_test['transactions']:,} May-June "
+      f"multi-product baskets, the selected neural network achieved {nn_test['hit_at_2']:.2%} "
+      f"Hit@2 versus {product_pair['hit_at_2']:.2%} for a product-pair rule and "
+      f"{popularity['hit_at_2']:.2%} for two popular items, a {nn_gain:.2f} "
+      "percentage-point gain over popularity. This is retrospective prediction, not customer response to a prompt.")
     p(f"<b>Sales impact: not measured.</b> For illustration, assuming 5% genuinely new add-ons and 5% "
       f"existing-buyer discount leakage, the six-month proxy gives ${case_5_5['six_month_revenue_proxy']:,.0f} "
       f"extra revenue, ${case_5_5['six_month_gross_profit_proxy']:,.0f} extra gross profit, "
@@ -131,21 +132,46 @@ def build_report(results: dict, figures: Path, output: Path):
       "quality, not an actual point-of-sale impression or response.")
     story.append(PageBreak())
 
+    heading("2. Preprocessing and numeric encoding")
+    p("Every raw CSV field is converted to a numeric representation in an <b>audit-only</b> table. This makes "
+      "missingness, type handling, and reproducibility explicit. The network is deliberately given only the "
+      "selected product; transaction IDs, dates, branch, prices, discounts, and final revenue never enter its input.")
+    table([["Field group", "Audit/analysis transformation", "Model input?"] ,
+           ["Transaction ID", "Sorted integer code; grouping key", "No"],
+           ["Date / Time", "Days since 1970 / seconds after midnight", "No - split and EDA only"],
+           ["Branch / Order Type / Category", "Sorted integer code", "No"],
+           ["Customer ID", "Sorted integer code; missing = -1", "No"],
+           ["Product", "Sorted integer code; training-only vocabulary", "Yes - one-hot"],
+           ["Quantity", "Original positive integer", "No"],
+           ["Unit Price / Unit Cost", "Original USD numeric values", "No - economics only"],
+           ["Discount Rate", "Original decimal fraction", "No - descriptive only"],
+           ["Line Revenue / Gross Profit", "Original USD numeric values", "No - outcomes only"]],
+          [175, 245, 100])
+    p("<b>Model normalization:</b> a product is a 45-dimensional one-hot vector (one 1, all other entries 0); "
+      "its Euclidean norm is already 1, so z-score scaling is unnecessary. Basket targets become a normalized "
+      "distribution over the other distinct purchased products. Each basket contributes total training weight 1, "
+      "regardless of whether it contains two or three products. Single-product baskets contain no positive "
+      "complement label and are excluded from the ranking loss, but remain in EDA and opportunity sizing.")
+    p("<b>Leakage controls:</b> vocabulary is learned on training records for evaluation; dates define chronological "
+      "splits; no test basket updates the benchmark model. The final app model is retrained on all six months only "
+      "after the test result is fixed. The numeric audit table is never passed to model.fit().")
+    story.append(PageBreak())
+
     captions = [
-        ("2. Time and branch", "01_hour_branch.png",
+        ("3. Time and branch", "01_hour_branch.png",
          "Counts use transactions per branch-hour. Multi-product share divides multi-product transactions by all transactions in each branch-hour. Traffic is not a measure of queue length or capacity."),
-        ("3. Category mix by daypart", "02_category_daypart.png",
+        ("4. Category mix by daypart", "02_category_daypart.png",
          "Each transaction/category presence is counted once. Shares are within daypart and describe product mix, not a probability that a recommendation will convert."),
-        ("4. Product-pair association", "03_pair_lift.png",
+        ("5. Product-pair association", "03_pair_lift.png",
          "Lift compares observed pair frequency with the expectation under unconditioned independence. Only pairs with at least 20 transactions are shown; lift remains associational and can reflect context and basket size."),
-        ("5. Example pairing", "04_example_pair.png",
+        ("6. Example pairing", "04_example_pair.png",
          f"{escape(pair['seed'])} and {escape(pair['addon'])} occur together in {pair['total_pair_transactions']} completed transactions. Bars divide pair baskets by seed-containing baskets in each branch and daypart; detailed cell counts are in outputs/results.json."),
-        ("6. Other factors", "05_other_factors.png",
+        ("7. Other factors", "05_other_factors.png",
          "Weekday, month, and order type are plotted even when differences are small. Rates use all completed transactions in each group. Effects can be confounded by branch, product mix, and traffic."),
-        ("7. Discount and margin", "06_discount_margin.png",
+        ("8. Discount and margin", "06_discount_margin.png",
          "The left panel is a descriptive split by whether any line was discounted; it is not a causal discount estimate. The right panel uses branch-product median price and cost to calculate a hypothetical 15%-off unit margin."),
-        ("8. Retrospective model comparison", "07_model_ablation.png",
-         f"Models fit January-March and evaluate April-June. Best plotted Hit@2 is {escape(results['best_hit2_mode'])}; that choice is exploratory because later months were already discussed in prior project context."),
+        ("9. Held-out model comparison", "07_model_ablation.png",
+         "All models fit January-March and are evaluated on May-June after April validation selects neural architecture. The historical test period was discussed in previous project work, so this is retrospective evidence rather than a pristine prospective study."),
     ]
     for title, name, caption in captions:
         heading(title)
@@ -154,36 +180,54 @@ def build_report(results: dict, figures: Path, output: Path):
         p(caption, "SmallX")
         story.append(PageBreak())
 
-    heading("9. Model and validation")
-    p("The live recommender is a smoothed product-pair co-purchase table. It records pair counts and "
-      "seed-product exposures, with global popularity as a prior for sparse pairs. The benchmark also tests "
-      "daypart and branch conditioning with additional shrinkage. The live rule returns two distinct menu products "
-      "with positive hypothetical discounted unit gross "
-      "profit. A completed local demo order updates counts once using its event ID; a displayed suggestion does not.")
-    rows = [["Rule", "Hit@1", "Hit@2 (95% CI)", "MRR@2"]]
-    for mode, r in bench["models"].items():
-        lo, hi = r["hit_at_2_ci95"]
-        rows.append([mode, f"{r['hit_at_1']:.1%}", f"{r['hit_at_2']:.1%} ({lo:.1%}-{hi:.1%})", f"{r['mrr_at_2']:.3f}"])
-    table(rows, [135, 70, 210, 105])
-    p(f"Training transactions: {bench['train_transactions']:,}. Evaluation transactions: "
-      f"{bench['test_transactions']:,}; the metric denominator is multi-product transactions in that period "
-      "with a pseudo-seed. Hit@2 means at least one actual other product is in the two suggestions. "
-      "It does not measure add-on conversion or causal sales uplift.")
-    selected = bench["models"]["pair"]
-    p(f"The selected pair rule has {selected['category_hit_at_2']:.1%} category-level Hit@2 and "
-      f"{selected['candidate_coverage']:.0%} candidate coverage across evaluated seeds. "
-      "The reported 95% intervals use transaction-level standard errors; they describe retrospective "
-      "ranking uncertainty, not uncertainty in business uplift.")
-    roll = results["rolling_best"]
-    table([["Month", "Multi-product test baskets", "Hit@2"]] +
-          [[m, f"{v['transactions']:,}", f"{v['hit_at_2']:.1%}"] for m, v in roll.items()], [150, 210, 160])
-    p("A neural network is not used: the dataset is small, there is no intervention-response label, and a "
-      "count-based model is directly updatable and auditable. Adding daypart and branch reduced Hit@2 in "
-      "this retrospective evaluation, so the app uses the simpler product-pair policy. Time remains available "
-      "for future testing when new intervention data arrive.")
+    heading("10. Neural training decisions and learning curves")
+    story.append(_image(figures / "08_neural_training.png"))
+    story.append(Spacer(1, 10))
+    p("Two small networks were tried: 45 product inputs, either 16 or 32 tanh hidden units, and 45 softmax "
+      "outputs. The output corresponding to the selected product is masked. Training uses transaction-weighted "
+      "cross-entropy, Adam with learning rate 0.01, batches of 512, L2 weight decay 0.0001, a fixed seed, "
+      "and early stopping after six epochs without lower April validation loss. The architecture is selected "
+      "by April Hit@2, with validation loss as a tie-breaker; May-June is not used for tuning.", "SmallX")
     story.append(PageBreak())
 
-    heading("10. Financial sensitivity - example, not forecast")
+    heading("11. Train / validation / test results")
+    split = neural["split"]
+    table([["Partition", "Dates", "Transactions", "Multi-product baskets"],
+           ["Train", split["train"], f"{split['train_transactions']:,}", f"{split['train_multi_product_transactions']:,}"],
+           ["Validation", split["validation"], f"{split['validation_transactions']:,}", f"{split['validation_multi_product_transactions']:,}"],
+           ["Test", split["test"], f"{split['test_transactions']:,}", f"{split['test_multi_product_transactions']:,}"]],
+          [85, 195, 110, 130])
+    table([["Hidden units", "Chosen epoch", "April validation Hit@2", "Validation loss"]] +
+          [[str(c["hidden_units"]), str(c["best_epoch"]),
+            f"{c['validation_metrics']['hit_at_2']:.2%}", f"{c['validation_loss']:.3f}"]
+           for c in neural["candidates"]], [95, 105, 170, 150])
+    p(f"<b>Selected network:</b> {neural['architecture']}. The input is exactly one product; the final output "
+      "is the two highest-scoring different products. The app loads weights refit on all six months for the "
+      f"preselected {neural['selected_epoch']} epochs. Its held-out result below belongs to the pre-refit "
+      "train/validation model, not the post-refit app weights.")
+    rows = [["Rule", "Hit@1", "Hit@2 (95% CI)", "Category Hit@2"]]
+    for mode in ["global", "pair", "pair_daypart"]:
+        r = bench["models"][mode]
+        lo, hi = r["hit_at_2_ci95"]
+        rows.append([mode, f"{r['hit_at_1']:.2%}", f"{r['hit_at_2']:.2%} ({lo:.2%}-{hi:.2%})",
+                     f"{r['category_hit_at_2']:.2%}"])
+    lo, hi = nn_test["hit_at_2_ci95"]
+    rows.append(["Neural network", f"{nn_test['hit_at_1']:.2%}",
+                 f"{nn_test['hit_at_2']:.2%} ({lo:.2%}-{hi:.2%})",
+                 f"{nn_test['category_hit_at_2']:.2%}"])
+    table(rows, [110, 75, 225, 110])
+    p("Hit@2 counts a transaction as successful when at least one of the two recommendations appears among "
+      "its other purchased products. Every possible seed orientation is evaluated, weighted to total one per "
+      "transaction. All shown models cover 100% of known seed products. MRR@2, branch/daypart breakdowns, "
+      "full candidate histories, and exact values are in outputs/results.json. Intervals use transaction-level "
+      "standard errors. This is basket prediction, not offer conversion or causal uplift.")
+    p("<b>Online learning:</b> every confirmed multi-product demo order produces one gradient step at learning "
+      "rate 0.025; an event ID prevents double updates. Single-product orders are logged but have no positive "
+      "complement target. On restart, the app loads the saved six-month base weights and replays completed "
+      "demo events once. No prompt impression is used as a training label.")
+    story.append(PageBreak())
+
+    heading("12. Financial sensitivity - example, not forecast")
     e = example
     unit = add_on_economics(e["price"], e["cost"])
     p(f"Example: Harbour, first item {pair['seed']}, offered add-on {pair['addon']}. "
@@ -207,11 +251,11 @@ def build_report(results: dict, figures: Path, output: Path):
       "incremental gross profit in this simplified example. Larger operating or substitution costs raise this threshold.")
     story.append(PageBreak())
 
-    heading("11. Portfolio-scale sensitivity")
+    heading("13. Portfolio-scale sensitivity")
     portfolio = results["portfolio_scenarios"]
     cost = portfolio["operating_cost_assumptions"]
     p(f"There are {portfolio['completed_one_product_baskets_proxy']:,} completed one-product transactions. "
-      "Using them as a historical sizing proxy, the final product-pair model generates two offers for each basket. "
+      "Using them as a historical sizing proxy, the final neural model generates two offers for each basket. "
       f"An equal mix of the two offers has mean discounted selling price "
       f"${portfolio['average_of_two_offered_discounted_prices']:.2f}, mean discounted unit gross profit "
       f"${portfolio['average_of_two_offered_discounted_gross_profits']:.2f}, and mean discount concession "
@@ -236,7 +280,7 @@ def build_report(results: dict, figures: Path, output: Path):
       "must measure full baskets, not only recommended-item redemptions.")
     story.append(PageBreak())
 
-    heading("12. Marketing, operations, and pilot")
+    heading("14. Marketing, operations, and pilot")
     p("<b>Customer presentation:</b> after the first item, show two relevant add-ons, each original and discounted "
       "price, and a plain 15-second timer. Discount only a selected add-on. Monitor whether urgency increases "
       "abandonment or dissatisfaction. Branch and daypart can be used for targeting only when retrospective "

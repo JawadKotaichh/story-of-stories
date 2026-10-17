@@ -2,8 +2,9 @@ from datetime import datetime
 
 import pytest
 
-from src.data import Basket, audit, build_baskets, load_lines
+from src.data import Basket, audit, build_baskets, load_lines, numeric_audit_frame
 from src.economics import add_on_economics, break_even_new_rate, scenario_per_offer
+from src.online_nn import OnlineNeuralRecommender
 from src.recommender import IncrementalRecommender
 
 
@@ -34,6 +35,24 @@ def test_discount_applies_to_add_on_only_and_break_even():
     assert scenario["incremental_gross_profit"] == pytest.approx(.05*1.90-.10*.54)
 
 
+def test_neural_top_two_online_update_and_reload(tmp_path):
+    m = OnlineNeuralRecommender(["Coffee", "Cookie", "Tea"], hidden=4, seed=2)
+    before = m.w2.copy()
+    recommendations = m.recommend("Coffee")
+    assert len(recommendations) == 2
+    assert {r.product for r in recommendations} == {"Cookie", "Tea"}
+    assert m.update(basket("online-1", ["Coffee", "Cookie"]))
+    assert m.online_updates == 1
+    assert not (m.w2 == before).all()
+    after = m.w2.copy()
+    assert not m.update(basket("online-1", ["Coffee", "Cookie"]))
+    assert (m.w2 == after).all()
+    path = tmp_path / "model.npz"
+    m.save(path)
+    restored = OnlineNeuralRecommender.load(path)
+    assert [r.product for r in restored.recommend("Coffee")] == [r.product for r in m.recommend("Coffee")]
+
+
 def test_source_reconciliation():
     df = load_lines("stories_transactions.csv")
     summary = audit(df)
@@ -43,3 +62,6 @@ def test_source_reconciliation():
     assert summary["revenue"] == 305925.14
     assert summary["gross_profit"] == 179430.49
     assert sum(b.revenue for b in baskets) == pytest.approx(305925.14)
+    numeric, methods = numeric_audit_frame(df)
+    assert len(numeric.columns) == 14 == len(methods)
+    assert not numeric.isna().any().any()

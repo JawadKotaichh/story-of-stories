@@ -13,7 +13,7 @@ def main():
     df = load_lines(root / "stories_transactions.csv")
     baskets = build_baskets(df)
     figures = root / "figures"
-    results = analyze(df, baskets, figures)
+    results = analyze(df, baskets, figures, root / "models" / "nn_recommender.npz")
     outputs = root / "outputs"
     outputs.mkdir(exist_ok=True)
     (outputs / "results.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
@@ -21,7 +21,8 @@ def main():
     print(json.dumps({
         "audit": results["audit"],
         "models_hit_at_2": {k: round(v["hit_at_2"], 4) for k, v in results["benchmarks"]["models"].items()},
-        "best_hit2_mode": results["best_hit2_mode"],
+        "neural_test_hit_at_2": round(results["neural_training"]["test_metrics"]["hit_at_2"], 4),
+        "selected_hidden_units": results["neural_training"]["selected_hidden_units"],
         "pair_example": results["pair_example"]["total_pair_transactions"],
         "pdf": str(root / "Analysis.pdf"),
     }, indent=2))
