@@ -25,7 +25,6 @@ This repository contains a reproducible analysis of `stories_transactions.csv`, 
 | `models/nn_recommender.npz` | Saved six-month neural weights and product vocabulary |
 | `figures/`, `outputs/results.json` | Generated plots, training curves, and computed tables |
 | `Analysis.pdf` | Reviewed analysis and pilot proposal |
-| `IMPLEMENTATION_PLAN.md` | Original detailed implementation plan |
 
 ## Local setup
 
