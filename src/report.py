@@ -81,6 +81,27 @@ def build_report(results: dict, figures: Path, output: Path):
     p("<b>Recommendation:</b> use the working local demo and run a randomized checkout pilot. Measure total basket "
       "gross profit and revenue per eligible checkout against a no-offer control. Do not describe the scenario "
       "figures in this report as a forecast.")
+    popularity = bench["models"]["global"]
+    product_pair = bench["models"]["pair"]
+    with_time = bench["models"]["pair_daypart"]
+    pp_gain = (product_pair["hit_at_2"] - popularity["hit_at_2"]) * 100
+    cases = results["portfolio_scenarios"]["scenarios"]
+    case_5_5 = next(s for s in cases if s["new_add_on_rate_assumed"] == .05 and
+                    s["existing_buyers_discounted_rate_assumed"] == .05)
+    case_5_10 = next(s for s in cases if s["new_add_on_rate_assumed"] == .05 and
+                     s["existing_buyers_discounted_rate_assumed"] == .10)
+    heading("Did the idea improve anything?")
+    p(f"<b>Historical prediction: modestly.</b> On {product_pair['transactions']:,} later-period "
+      f"multi-product baskets, the selected product-pair rule achieved {product_pair['hit_at_2']:.2%} "
+      f"Hit@2 versus {popularity['hit_at_2']:.2%} for two popular items, a {pp_gain:.2f} "
+      f"percentage-point gain. Adding daypart reached {with_time['hit_at_2']:.2%}, so it was omitted "
+      "from the live rule. This is retrospective prediction, not customer response to a prompt.")
+    p(f"<b>Sales impact: not measured.</b> For illustration, assuming 5% genuinely new add-ons and 5% "
+      f"existing-buyer discount leakage, the six-month proxy gives ${case_5_5['six_month_revenue_proxy']:,.0f} "
+      f"extra revenue, ${case_5_5['six_month_gross_profit_proxy']:,.0f} extra gross profit, "
+      f"and ${case_5_5['six_month_net_proxy_after_assumed_costs']:,.0f} after assumed operating costs. "
+      f"With 10% leakage, that net becomes ${case_5_10['six_month_net_proxy_after_assumed_costs']:,.0f}. "
+      "The CSV cannot establish either response rate; only a randomized pilot can establish uplift.")
     table([["Evidence class", "What is known"],
            ["Observed", f"{audit['transactions']:,} completed transactions, ${audit['revenue']:,.2f} recorded revenue."],
            ["Backtested", "Historical top-two basket prediction on later months; not offer response."],
